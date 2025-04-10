@@ -19,3 +19,4 @@ export class User {
     @OneToMany(() => Cv, (cv) => cv.user)
     cvs: Cv[];
 }
+
