@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
+import { CvFilterDto } from './dto/filter-cv.dto';
 
 @Controller('cv')
 export class CvController {
@@ -13,8 +14,11 @@ export class CvController {
   }
 
   @Get()
-  findAll() {
-    return this.cvService.findAll();
+  async findAll(@Query() query : CvFilterDto) {
+   
+    return query.age || query.criteria ? await this.cvService.findByQuery(query):await this.cvService.findAll();
+
+    
   }
 
   @Get(':id')
