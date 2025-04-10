@@ -28,4 +28,5 @@ create(data: DeepPartial<T>): Promise<T> {
   delete(id: number): Promise<void> {
     return this.repository.delete(id).then(() => undefined);
   }
+  
 }
