@@ -3,6 +3,9 @@ import { SeederService } from './seeders/seeder.service';
 import { SharedConfigModule } from '../../config/config.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../../src/user/entities/user.entity';
+import { Cv } from '../../src/cv/entities/cv.entity';
+import { Skill } from '../../src/skill/entities/skill.entity';
 
 @Module({
     imports: [
@@ -20,7 +23,7 @@ import { ConfigService } from '@nestjs/config';
             },
             inject: [ConfigService],
         }),
-
+        TypeOrmModule.forFeature([User, Cv, Skill]),
     ],
     providers: [SeederService]
 })
