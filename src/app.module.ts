@@ -1,11 +1,33 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CvModule } from './cv/cv.module';
+import { SkillModule } from './skill/skill.module';
+import { UserModule } from './user/user.module';
+import { SharedConfigModule } from 'config/config.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    SharedConfigModule,
+    TypeOrmModule.forRootAsync({
+      imports: [SharedConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const typeOrmConfig = configService.get('typeorm');
+
+        if (!typeOrmConfig) {
+          throw new Error('TypeORM configuration is missing');
+        }
+
+        return typeOrmConfig;
+      },
+      inject: [ConfigService],
+    }),
+    UserModule,
+    CvModule,
+    SkillModule,
+  ],
 })
 export class AppModule {}
 
