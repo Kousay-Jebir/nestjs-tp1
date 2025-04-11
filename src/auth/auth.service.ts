@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from '../user/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -21,13 +22,12 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = this.userRepository.create({
-      username,
-      password: hashedPassword,
-      salt,
-      email,
-      role,
-    });
+
+    const user = new User();
+    user.username = username;
+    user.password = hashedPassword;
+    user.email = email;
+    user.role = role || Role.USER;
 
     await this.userRepository.save(user);
   }
