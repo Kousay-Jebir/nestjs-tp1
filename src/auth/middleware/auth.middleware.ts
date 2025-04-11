@@ -11,7 +11,7 @@ export class AuthMiddleware implements NestMiddleware{
 
         }
         try{
-            const decoded = verify(token,'SECRET') as {userId:number}
+            const decoded = verify(token,'SECRET') as {sub:string,userId:number,iat:number}
             if(!decoded?.userId){
                 return res.status(401).json({ message: 'Vous ne pouvez pas accéder à la ressource' });
             }
