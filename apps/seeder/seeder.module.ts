@@ -8,23 +8,23 @@ import { Cv } from '../../src/cv/entities/cv.entity';
 import { Skill } from '../../src/skill/entities/skill.entity';
 
 @Module({
-    imports: [
-        SharedConfigModule,
-        TypeOrmModule.forRootAsync({
-            imports: [SharedConfigModule],
-            useFactory: (configService: ConfigService) => {
-                const typeOrmConfig = configService.get('typeorm');
+  imports: [
+    SharedConfigModule,
+    TypeOrmModule.forRootAsync({
+      imports: [SharedConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const typeOrmConfig = configService.get('typeorm');
 
-                if (!typeOrmConfig) {
-                    throw new Error('TypeORM configuration is missing');
-                }
+        if (!typeOrmConfig) {
+          throw new Error('TypeORM configuration is missing');
+        }
 
-                return typeOrmConfig;
-            },
-            inject: [ConfigService],
-        }),
-        TypeOrmModule.forFeature([User, Cv, Skill]),
-    ],
-    providers: [SeederService]
+        return typeOrmConfig;
+      },
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forFeature([User, Cv, Skill]),
+  ],
+  providers: [SeederService],
 })
-export class SeederModule { }
+export class SeederModule {}
