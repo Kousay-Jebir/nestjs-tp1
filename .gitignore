@@ -39,4 +39,4 @@ coverage/
 
 # Other temporary files
 *.tmp
-.env
+.env.development
