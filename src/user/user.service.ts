@@ -9,7 +9,6 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class UserService extends SharedService<User> {
   constructor(@InjectRepository(User) repo: Repository<User>) {
-        super(repo);
-      }
-
+    super(repo);
+  }
 }

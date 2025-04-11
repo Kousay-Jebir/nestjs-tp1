@@ -4,25 +4,24 @@ import { Role } from '../enums/role.enum';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ unique: true })
-    username: string;
+  @Column({ unique: true })
+  username: string;
 
-    @Column({ unique: true })
-    email: string;
+  @Column({ unique: true })
+  email: string;
 
-    @Column()
-    password: string;
+  @Column()
+  password: string;
 
-    @Column()
-    salt: string;
+  @Column()
+  salt: string;
 
-    @Column({ type: 'enum', enum: Role, default: Role.USER })
-    role: Role;
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
 
-    @OneToMany(() => Cv, (cv) => cv.user)
-    cvs: Cv[];
+  @OneToMany(() => Cv, (cv) => cv.user)
+  cvs: Cv[];
 }
-

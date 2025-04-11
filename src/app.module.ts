@@ -30,8 +30,7 @@ import { AuthModule } from './auth/auth.module';
     SkillModule,
     AuthModule,
   ],
+  providers: [AppService],
+  controllers: [AppController],
 })
 export class AppModule {}
-
-
-
