@@ -6,10 +6,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cv } from './entities/cv.entity';
 import { Repository } from 'typeorm';
 import { CvFilterDto } from './dto/filter-cv.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class CvService extends SharedService<Cv> {
-  constructor(@InjectRepository(Cv) repo: Repository<Cv>) {
+  constructor(@InjectRepository(Cv) repo: Repository<Cv>,
+  private readonly userService : UserService) {
     super(repo);
   }
 
@@ -29,6 +31,18 @@ export class CvService extends SharedService<Cv> {
   }
 
   return await query.getMany();
+
+  }
+
+  async createWithUser(createCvDto : CreateCvDto,id:number){
+    const user = await this.userService.findOne(id);
+
+    if(user){
+      const cv = await this.repository.create({...createCvDto})
+      cv.user=user
+      
+      return await this.repository.save(cv)
+    }
 
   }
  
