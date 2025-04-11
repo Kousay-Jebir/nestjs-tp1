@@ -8,15 +8,12 @@ import { AuthMiddleware } from 'src/auth/middleware/auth.middleware';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Cv]),UserModule
-  ],
-  controllers: [CvController,Cv2Controller],
+  imports: [TypeOrmModule.forFeature([Cv]), UserModule],
+  controllers: [CvController, Cv2Controller],
   providers: [CvService],
 })
 export class CvModule {
-  configure(consumer:MiddlewareConsumer){
-    consumer.apply(AuthMiddleware)
-    .forRoutes(Cv2Controller)
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes(Cv2Controller);
   }
 }

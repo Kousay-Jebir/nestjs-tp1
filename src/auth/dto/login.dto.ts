@@ -1,11 +1,11 @@
 import { IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @IsString({ message: 'Username must be a string' })
-  @MinLength(3, { message: 'Username must be at least 3 characters long' })
+  @IsString({ message: 'Le nom d\'utilisateur doit être une chaîne de caractères' })
+  @MinLength(3, { message: 'Le nom d\'utilisateur doit contenir au moins 3 caractères' })
   username: string;
 
-  @IsString({ message: 'Password must be a string' })
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @IsString({ message: 'Le mot de passe doit être une chaîne de caractères' })
+  @MinLength(6, { message: 'Le mot de passe doit contenir au moins 6 caractères' })
   password: string;
 }
