@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Cv } from '../../cv/entities/cv.entity';
+import { Role } from '../enums/role.enum';
 
 @Entity()
 export class User {
@@ -15,6 +16,11 @@ export class User {
     @Column()
     password: string;
 
+    @Column()
+    salt: string;
+
+    @Column({ type: 'enum', enum: Role, default: Role.USER })
+    role: Role;
 
     @OneToMany(() => Cv, (cv) => cv.user)
     cvs: Cv[];
