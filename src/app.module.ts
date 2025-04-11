@@ -28,8 +28,7 @@ import { ConfigService } from '@nestjs/config';
     CvModule,
     SkillModule,
   ],
+  providers: [AppService],
+  controllers: [AppController],
 })
 export class AppModule {}
-
-
-

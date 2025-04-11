@@ -5,9 +5,7 @@ import { Skill } from './entities/skill.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Skill])
-  ],
+  imports: [TypeOrmModule.forFeature([Skill])],
   controllers: [SkillController],
   providers: [SkillService],
 })
