@@ -2,18 +2,18 @@ import { Role } from '../../user/enums/role.enum';
 import { IsEmail, IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class SignupDto {
-  @IsString({ message: 'Username must be a string' })
-  @MinLength(3, { message: 'Username must be at least 3 characters long' })
-  @MaxLength(20, { message: 'Username must be at most 20 characters long' })
+  @IsString({ message: 'Le nom d\'utilisateur doit être une chaîne de caractères' })
+  @MinLength(3, { message: 'Le nom d\'utilisateur doit contenir au moins 3 caractères' })
+  @MaxLength(20, { message: 'Le nom d\'utilisateur doit contenir au maximum 20 caractères' })
   username: string;
 
-  @IsString({ message: 'Password must be a string' })
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @IsString({ message: 'Le mot de passe doit être une chaîne de caractères' })
+  @MinLength(6, { message: 'Le mot de passe doit contenir au moins 6 caractères' })
   password: string;
 
-  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @IsEmail({}, { message: 'L\'email doit être une adresse email valide' })
   email: string;
 
-  @IsEnum(Role, { message: 'Role must be one of the valid roles' })
+  @IsEnum(Role, { message: 'Le rôle doit être l\'un des rôles valides' })
   role: Role;
 }
