@@ -25,7 +25,7 @@ export class Cv {
     @Column()
     path: string;
 
-    @ManyToOne(() => User, (user) => user.cvs)
+    @ManyToOne(() => User, (user) => user.cvs,{eager:true})
     user: User;
 
     @ManyToMany(() => Skill)

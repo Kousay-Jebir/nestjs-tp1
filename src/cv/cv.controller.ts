@@ -3,8 +3,9 @@ import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { CvFilterDto } from './dto/filter-cv.dto';
+import { Cv } from './entities/cv.entity';
 
-@Controller('cv')
+@Controller({path:'cv',version:'1'})
 export class CvController {
   constructor(private readonly cvService: CvService) {}
 
@@ -14,7 +15,7 @@ export class CvController {
   }
 
   @Get()
-  async findAll(@Query() query : CvFilterDto) {
+  async findAll(@Query() query : CvFilterDto):Promise<Cv[]> {
    
     return query.age || query.criteria ? await this.cvService.findByQuery(query):await this.cvService.findAll();
 

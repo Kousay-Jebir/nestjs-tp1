@@ -10,8 +10,8 @@ export class SharedService<T extends ObjectLiteral> {
     return this.repository.find();
   }
 
-  findOne(id: number): Promise<T | null> {
-    return this.repository.findOne({ where: { id } as any });
+ async findOne(id: number){
+    return await this.repository.findOne({ where: { id } as any });
   }
 
 
@@ -21,12 +21,12 @@ create(data: DeepPartial<T>): Promise<T> {
 }
 
 
-  update(id: number, data: Partial<T>) {
-    return this.repository.save({ ...data, id } as any);
+  async update(id: number, data: Partial<T>) {
+    return await this.repository.save({ ...data, id } as any);
   }
 
-  delete(id: number): Promise<void> {
-    return this.repository.delete(id).then(() => undefined);
+  async delete(id: number): Promise<void> {
+    return await this.repository.delete(id).then(() => undefined);
   }
   
 }
