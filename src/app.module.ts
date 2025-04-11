@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { SharedConfigModule } from 'config/config.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ConfigService } from '@nestjs/config';
     UserModule,
     CvModule,
     SkillModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
