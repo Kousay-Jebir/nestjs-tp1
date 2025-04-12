@@ -9,14 +9,18 @@ import {
   DeepPartial,
   FindOptionsWhere,
 } from 'typeorm';
+import { PaginationDto } from './pagination.dto';
 
 @Injectable()
 export class SharedService<T extends ObjectLiteral> {
   constructor(protected readonly repository: Repository<T>) {}
 
-  async findAll(): Promise<T[]> {
+  async findAll(filter? : PaginationDto): Promise<T[]> {
     try {
-      return await this.repository.find();
+      return filter?  await this.repository.find({
+        take: filter.limit,
+        skip: filter.offset,
+      }) : await this.repository.find();
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

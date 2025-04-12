@@ -53,7 +53,7 @@ export class CvController {
   async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll();
+      : await this.cvService.findAll({offset:query?.offset,limit:query?.limit});
   }
   
   @UseGuards(JwtAuthGuard, OwnershipOrAdminGuard)
@@ -125,4 +125,5 @@ export class CvController {
       throw error;
     }
   }
+ 
 }
