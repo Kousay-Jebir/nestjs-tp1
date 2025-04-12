@@ -36,15 +36,36 @@ export class CvService extends SharedService<Cv> {
     return await query.getMany();
   }
 
-  async createWithUser(createCvDto: CreateCvDto, id: number) {
-    const user = await this.userService.findOne(id);
+  async create(createCvDto: CreateCvDto): Promise<Cv> {
+    const cv = this.repository.create({
+      name: createCvDto.name,
+      firstname: createCvDto.firstname,
+      age: createCvDto.age,
+      cin: createCvDto.cin,
+      job: createCvDto.job,
+      path: createCvDto.path || '',
+    });
+    return await this.repository.save(cv);
+  }
 
-    if (user) {
-      const cv = this.repository.create({ ...createCvDto });
-      cv.user = user;
+  async createWithUser(createCvDto: CreateCvDto, userId: number): Promise<Cv> {
+    const user = await this.userService.findOne(userId);
 
-      return await this.repository.save(cv);
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
     }
+
+    const cv = this.repository.create({
+      name: createCvDto.name,
+      firstname: createCvDto.firstname,
+      age: createCvDto.age,
+      cin: createCvDto.cin,
+      job: createCvDto.job,
+      path: createCvDto.path || '',
+      user,
+    });
+
+    return await this.repository.save(cv);
   }
 
   async updatePhoto(id: number, filename: string) {

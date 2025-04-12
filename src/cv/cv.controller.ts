@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   MaxFileSizeValidator,
   ParseFilePipe,
-  Req,
   UploadedFile,
   UseInterceptors,
   NotFoundException,
@@ -24,16 +23,15 @@ import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { CvFilterDto } from './dto/filter-cv.dto';
 import { Cv } from './entities/cv.entity';
-import { RequestWithUser } from './interfaces/requestWithUser.type';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { uploadConfig } from 'config/upload.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { User } from '../auth/decorators/user.decorator';
 
 @Controller({ path: 'cv', version: '1' })
 @UseGuards(JwtAuthGuard)
-@Controller({ path: 'cv', version: '1' })
 export class CvController {
   constructor(private readonly cvService: CvService) {}
 
@@ -41,9 +39,9 @@ export class CvController {
   create(@Body() createCvDto: CreateCvDto) {
     return this.cvService.create(createCvDto);
   }
+
   @Post('withuser')
-  addWithUser(@Body() createCvDto: CreateCvDto, @Req() req: RequestWithUser) {
-    const userId: number = req.user.userId;
+  addWithUser(@Body() createCvDto: CreateCvDto, @User('userId') userId: number) {
     return this.cvService.createWithUser(createCvDto, userId);
   }
 
@@ -51,12 +49,8 @@ export class CvController {
   async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll();}
-  // async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
-  //   return query.age || query.criteria
-  //     ? await this.cvService.findByQuery(query)
-  //     : await this.cvService.findAll();
-  // }
+      : await this.cvService.findAll();
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -67,9 +61,8 @@ export class CvController {
   async update(
     @Param('id') id: number,
     @Body() updateCvDto: UpdateCvDto,
-    @Req() req: RequestWithUser,
+    @User('userId') userId: number,
   ): Promise<Cv> {
-    const userId: number = req.user.userId;
     const cv = await this.cvService.findOne(id);
 
     if (!cv?.user.id || cv.user.id !== userId) {
@@ -80,8 +73,7 @@ export class CvController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
-    const userId: number = req.user.userId;
+  async remove(@Param('id') id: string, @User('userId') userId: number) {
     const cv = await this.cvService.findOne(+id);
 
     return cv?.user.id == userId
@@ -111,7 +103,6 @@ export class CvController {
 
       return await this.cvService.updatePhoto(id, file.filename);
     } catch (error) {
-      // Delete uploaded file if service operation fails
       if (file?.filename) {
         const filePath = path.join(
           process.cwd(),
