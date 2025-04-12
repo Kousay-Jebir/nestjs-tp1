@@ -51,12 +51,12 @@ export class CvController {
   async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll();
-  async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
-    return query.age || query.criteria
-      ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll();
-  }
+      : await this.cvService.findAll();}
+  // async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
+  //   return query.age || query.criteria
+  //     ? await this.cvService.findByQuery(query)
+  //     : await this.cvService.findAll();
+  // }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
