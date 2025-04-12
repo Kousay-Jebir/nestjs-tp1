@@ -9,7 +9,7 @@ export class AuthMiddleware implements NestMiddleware {
     if (!token) {
       return res
         .status(401)
-        .json({ message: 'Vous ne pouvez pas accéder à la ressource1' });
+        .json({ message: 'Vous ne pouvez pas accéder à la ressource' });
     }
     try {
       const decoded = verify(token, 'SECRET') as {
@@ -20,14 +20,14 @@ export class AuthMiddleware implements NestMiddleware {
       if (!decoded?.userId) {
         return res
           .status(401)
-          .json({ message: 'Vous ne pouvez pas accéder à la ressource2' });
+          .json({ message: 'Vous ne pouvez pas accéder à la ressource' });
       }
       req.user = { userId: decoded.userId };
       next();
     } catch (err) {
       return res
         .status(401)
-        .json({ message: 'Vous ne pouvez pas accéder à la ressource3' });
+        .json({ message: 'Vous ne pouvez pas accéder à la ressource' });
     }
   }
 }
