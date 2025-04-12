@@ -1,5 +1,6 @@
 import { Role } from '../../user/enums/role.enum';
 import { IsEmail, IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
+import { Column } from 'typeorm';
 
 export class SignupDto {
   @IsString({ message: 'Le nom d\'utilisateur doit être une chaîne de caractères' })
@@ -14,6 +15,6 @@ export class SignupDto {
   @IsEmail({}, { message: 'L\'email doit être une adresse email valide' })
   email: string;
 
-  @IsEnum(Role, { message: 'Le rôle doit être l\'un des rôles valides' })
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 }
