@@ -65,18 +65,18 @@ export class CvController {
 
   @Patch(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() updateCvDto: UpdateCvDto,
     @Req() req: RequestWithUser,
   ): Promise<Cv> {
     const userId: number = req.user.userId;
-    const cv = await this.cvService.findOne(id);
+    const cv = await this.cvService.findOne(+id);
 
     if (!cv?.user.id || cv.user.id !== userId) {
       throw new ForbiddenException('Vous ne pouvez pas modifier ce CV');
     }
 
-    return this.cvService.update(id, updateCvDto);
+    return this.cvService.update(+id, updateCvDto);
   }
 
   @Delete(':id')
