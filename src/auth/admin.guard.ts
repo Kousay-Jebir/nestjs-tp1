@@ -1,11 +1,9 @@
-// src/auth/guards/admin.guard.ts
 import {
   CanActivate,
   ExecutionContext,
   Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
