@@ -10,17 +10,29 @@ import {
   FindOptionsWhere,
 } from 'typeorm';
 import { PaginationDto } from './pagination.dto';
+import { Role } from 'src/user/enums/role.enum';
+import { User } from 'src/user/entities/user.entity';
+import { use } from 'passport';
 
 @Injectable()
 export class SharedService<T extends ObjectLiteral> {
   constructor(protected readonly repository: Repository<T>) {}
 
-  async findAll(filter? : PaginationDto): Promise<T[]> {
+  async findAll(filter? : PaginationDto,user?:any): Promise<T[]> {
     try {
-      return filter?  await this.repository.find({
-        take: filter.limit,
-        skip: filter.offset,
-      }) : await this.repository.find();
+      const options: any = {};
+      
+
+      if (user?.role !== 'admin') {
+        options.where = { user : {id: user?.userId} } as any;
+      }
+  
+      if (filter?.limit !== undefined && filter?.offset !== undefined) {
+        options.take = filter.limit;
+        options.skip = filter.offset;
+      }
+  
+      return await this.repository.find(options);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

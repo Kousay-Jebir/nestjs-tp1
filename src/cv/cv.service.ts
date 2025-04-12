@@ -8,6 +8,7 @@ import { CvFilterDto } from './dto/filter-cv.dto';
 import { UserService } from 'src/user/user.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { PaginationDto } from 'src/services/pagination.dto';
 
 @Injectable()
 export class CvService extends SharedService<Cv> {
@@ -18,8 +19,9 @@ export class CvService extends SharedService<Cv> {
     super(repo);
   }
 
+
   async findByQuery(filter?: CvFilterDto): Promise<Cv[]> {
-    const { criteria, age } = filter || {};
+    const { criteria, age,limit,offset } = filter || {};
     const query = this.repository.createQueryBuilder('cv');
 
     if (criteria) {
@@ -32,8 +34,11 @@ export class CvService extends SharedService<Cv> {
     if (age !== undefined) {
       query.andWhere('cv.age = :age', { age });
     }
+    return offset && limit ? await query.skip(offset).take(limit).getMany() : await query.getMany()
 
-    return await query.getMany();
+
+
+    
   }
 
   async create(createCvDto: CreateCvDto): Promise<Cv> {

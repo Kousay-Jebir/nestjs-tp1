@@ -28,10 +28,12 @@ import { uploadConfig } from 'config/upload.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { User } from '../auth/decorators/user.decorator';
+import  {User as ConnectedUser} from '../auth/decorators/user.decorator';
 import { OwnerParam } from 'src/roles/owner-param.decorator';
 import { AdminGuard } from 'src/auth/admin.guard';
 import { OwnershipOrAdminGuard } from 'src/roles/ownership.guard';
+import { Role } from 'src/user/enums/role.enum';
+import { User } from 'src/user/entities/user.entity';
 
 @Controller({ path: 'cv', version: '1' })
 @UseGuards(JwtAuthGuard)
@@ -44,16 +46,15 @@ export class CvController {
   }
 
   @Post('withuser')
-  addWithUser(@Body() createCvDto: CreateCvDto, @User('userId') userId: number) {
+  addWithUser(@Body() createCvDto: CreateCvDto, @ConnectedUser('userId') userId: number) {
     return this.cvService.createWithUser(createCvDto, userId);
   }
 
-  @UseGuards(AdminGuard)
   @Get()
-  async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
+  async findAll(@Query() query: CvFilterDto,@ConnectedUser() user : any): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll({offset:query?.offset,limit:query?.limit});
+      : await this.cvService.findAll({offset:query?.offset,limit:query?.limit},user);
   }
   
   @UseGuards(JwtAuthGuard, OwnershipOrAdminGuard)
@@ -67,7 +68,7 @@ export class CvController {
   async update(
     @Param('id') id: string,
     @Body() updateCvDto: UpdateCvDto,
-    @User('userId') userId: number
+    @ConnectedUser('userId') userId: number
   ): Promise<Cv> {
     const cv = await this.cvService.findOne(+id);
 
@@ -79,7 +80,7 @@ export class CvController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @User('userId') userId: number) {
+  async remove(@Param('id') id: string, @ConnectedUser('userId') userId: number) {
     const cv = await this.cvService.findOne(+id);
 
     return cv?.user.id == userId
