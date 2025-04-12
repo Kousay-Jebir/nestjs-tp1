@@ -29,6 +29,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from '../auth/decorators/user.decorator';
+import { OwnerParam } from 'src/roles/owner-param.decorator';
+import { AdminGuard } from 'src/auth/admin.guard';
+import { OwnershipOrAdminGuard } from 'src/roles/ownership.guard';
 
 @Controller({ path: 'cv', version: '1' })
 @UseGuards(JwtAuthGuard)
@@ -45,13 +48,16 @@ export class CvController {
     return this.cvService.createWithUser(createCvDto, userId);
   }
 
+  @UseGuards(AdminGuard)
   @Get()
   async findAll(@Query() query: CvFilterDto): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
       : await this.cvService.findAll();
   }
-
+  
+  @UseGuards(JwtAuthGuard, OwnershipOrAdminGuard)
+  @OwnerParam('id')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.cvService.findOne(+id);
