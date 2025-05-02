@@ -1,5 +1,6 @@
 // src/cv-history/entities/cv-history.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { ActionType } from '../enum/action-type.enum';
 
 @Entity()
 export class History {
@@ -8,8 +9,8 @@ export class History {
 
   
 
-  @Column()
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
+  @Column({type:'enum',enum:ActionType})
+  actionType: ActionType;
 
   @Column()
   performedBy: string;
