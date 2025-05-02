@@ -13,10 +13,14 @@ import { PaginationDto } from './pagination.dto';
 import { Role } from 'src/user/enums/role.enum';
 import { User } from 'src/user/entities/user.entity';
 import { use } from 'passport';
+import { EventBus } from '@nestjs/cqrs';
+import { ActionEvent } from 'src/event/event';
+import { ActionTypeEnum } from 'src/history/enum/action-type.enum';
 
 @Injectable()
 export class SharedService<T extends ObjectLiteral> {
-  constructor(protected readonly repository: Repository<T>) {}
+  constructor(protected readonly repository: Repository<T>,  private eventBus: EventBus,
+  ) {}
 
   async findAll(filter? : PaginationDto,user?:any): Promise<T[]> {
     try {
@@ -75,7 +79,7 @@ export class SharedService<T extends ObjectLiteral> {
     }
   }
 
-  async update(id: number, data: DeepPartial<T>): Promise<T> {
+  async update(id: number, data: DeepPartial<T>,userId:number): Promise<T> {
     const entity = await this.findOne(id);
     if (!entity) {
       throw new NotFoundException(`Entity with id ${id} not found`);
@@ -84,6 +88,7 @@ export class SharedService<T extends ObjectLiteral> {
       ...entity,
       ...data,
     });
+    await this.eventBus.publish(new ActionEvent(id,ActionTypeEnum.UPDATE, userId))
     return this.repository.save(updated);
   }
 
