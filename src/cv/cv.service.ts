@@ -9,19 +9,24 @@ import { UserService } from 'src/user/user.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PaginationDto } from 'src/services/pagination.dto';
+import { EventsService } from '../events/events.service';
+import { EventType } from '../events/entities/event.entity';
+import { EventsGateway } from '../events/events.gateway';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class CvService extends SharedService<Cv> {
   constructor(
     @InjectRepository(Cv) repo: Repository<Cv>,
     private readonly userService: UserService,
+    private readonly eventsService: EventsService,
+    private readonly eventsGateway: EventsGateway,
   ) {
     super(repo);
   }
 
-
   async findByQuery(filter?: CvFilterDto): Promise<Cv[]> {
-    const { criteria, age,limit,offset } = filter || {};
+    const { criteria, age, limit, offset } = filter || {};
     const query = this.repository.createQueryBuilder('cv');
 
     if (criteria) {
@@ -34,11 +39,9 @@ export class CvService extends SharedService<Cv> {
     if (age !== undefined) {
       query.andWhere('cv.age = :age', { age });
     }
-    return offset && limit ? await query.skip(offset).take(limit).getMany() : await query.getMany()
-
-
-
-    
+    return offset && limit
+      ? await query.skip(offset).take(limit).getMany()
+      : await query.getMany();
   }
 
   async create(createCvDto: CreateCvDto): Promise<Cv> {
@@ -70,10 +73,60 @@ export class CvService extends SharedService<Cv> {
       user,
     });
 
-    return await this.repository.save(cv);
+    const savedCv = await this.repository.save(cv);
+
+    // Log event and notify
+    const event = await this.eventsService.createEvent(
+      EventType.CREATE,
+      user,
+      savedCv,
+      { dto: createCvDto },
+    );
+    this.eventsGateway.notifyEvent(event);
+
+    return savedCv;
   }
 
-  async updatePhoto(id: number, filename: string) {
+  async updateWithUser(id: number, updateCvDto: any, user: User): Promise<Cv> {
+    const cv = await this.findOne(id);
+    if (!cv) {
+      throw new NotFoundException(`CV with ID ${id} not found`);
+    }
+
+    const updatedCv = await super.update(id, updateCvDto);
+
+    // Log event and notify
+    const event = await this.eventsService.createEvent(
+      EventType.UPDATE,
+      user,
+      updatedCv,
+      { dto: updateCvDto },
+    );
+    this.eventsGateway.notifyEvent(event);
+
+    return updatedCv;
+  }
+
+  async deleteWithUser(id: number, user: User): Promise<void> {
+    const cv = await this.findOne(id);
+    if (!cv) {
+      throw new NotFoundException(`CV with ID ${id} not found`);
+    }
+
+    // Log event before deletion
+    const event = await this.eventsService.createEvent(
+      EventType.DELETE,
+      user,
+      cv,
+    );
+
+    await super.delete(id);
+
+    // Notify after deletion
+    this.eventsGateway.notifyEvent(event);
+  }
+
+  async updatePhoto(id: number, filename: string, user: User) {
     const cv = await this.findOne(id);
     if (!cv) {
       throw new NotFoundException(`CV with ID ${id} not found`);
@@ -93,6 +146,17 @@ export class CvService extends SharedService<Cv> {
 
     // Update with new photo
     cv.path = filename;
-    return this.repository.save(cv);
+    const updatedCv = await this.repository.save(cv);
+
+    // Log event and notify
+    const event = await this.eventsService.createEvent(
+      EventType.PHOTO_UPDATE,
+      user,
+      updatedCv,
+      { filename },
+    );
+    this.eventsGateway.notifyEvent(event);
+
+    return updatedCv;
   }
 }

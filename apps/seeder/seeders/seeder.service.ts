@@ -18,7 +18,7 @@ import { Role } from '../../../src/user/enums/role.enum';
 
 @Injectable()
 export class SeederService {
-  constructor(private readonly dataSource: DataSource) { }
+  constructor(private readonly dataSource: DataSource) {}
 
   async seed(configs: SeedEntityConfig<any>[]) {
     for (const config of configs) {
@@ -32,14 +32,11 @@ export class SeederService {
     factory: () => Promise<any> | any,
     count: number,
   ) {
-    return Promise.all(
-      Array.from({ length: count }).map(() => factory())
-    );
+    return Promise.all(Array.from({ length: count }).map(() => factory()));
   }
 
   private async saveEntityData(entity: any, data: any[]) {
-    const repository: Repository<any> =
-      this.dataSource.getRepository(entity);
+    const repository: Repository<any> = this.dataSource.getRepository(entity);
     await repository.save(data);
   }
 
@@ -62,7 +59,6 @@ export class SeederService {
 
   // CV Factory
   async createFakeCv() {
-
     const userRepository = this.dataSource.getRepository(User);
     const skillRepository = this.dataSource.getRepository(Skill);
     const cvRepository = this.dataSource.getRepository(Cv);
@@ -98,6 +94,4 @@ export class SeederService {
     }
     return randomItems;
   }
-
-
 }

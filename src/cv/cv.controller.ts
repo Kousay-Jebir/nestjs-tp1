@@ -28,17 +28,19 @@ import { uploadConfig } from 'config/upload.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import  {User as ConnectedUser} from '../auth/decorators/user.decorator';
+import { User as ConnectedUser } from '../auth/decorators/user.decorator';
 import { OwnerParam } from 'src/roles/owner-param.decorator';
-import { AdminGuard } from 'src/auth/admin.guard';
 import { OwnershipOrAdminGuard } from 'src/roles/ownership.guard';
 import { Role } from 'src/user/enums/role.enum';
-import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Controller({ path: 'cv', version: '1' })
 @UseGuards(JwtAuthGuard)
 export class CvController {
-  constructor(private readonly cvService: CvService) {}
+  constructor(
+    private readonly cvService: CvService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   create(@Body() createCvDto: CreateCvDto) {
@@ -46,17 +48,23 @@ export class CvController {
   }
 
   @Post('withuser')
-  addWithUser(@Body() createCvDto: CreateCvDto, @ConnectedUser('userId') userId: number) {
-    return this.cvService.createWithUser(createCvDto, userId);
+  addWithUser(@Body() createCvDto: CreateCvDto, @ConnectedUser() user: any) {
+    return this.cvService.createWithUser(createCvDto, user.userId);
   }
 
   @Get()
-  async findAll(@Query() query: CvFilterDto,@ConnectedUser() user : any): Promise<Cv[]> {
+  async findAll(
+    @Query() query: CvFilterDto,
+    @ConnectedUser() user: any,
+  ): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll({offset:query?.offset,limit:query?.limit},user);
+      : await this.cvService.findAll(
+          { offset: query?.offset, limit: query?.limit },
+          user,
+        );
   }
-  
+
   @UseGuards(JwtAuthGuard, OwnershipOrAdminGuard)
   @OwnerParam('id')
   @Get(':id')
@@ -68,24 +76,34 @@ export class CvController {
   async update(
     @Param('id') id: string,
     @Body() updateCvDto: UpdateCvDto,
-    @ConnectedUser('userId') userId: number
+    @ConnectedUser() user: any,
   ): Promise<Cv> {
     const cv = await this.cvService.findOne(+id);
 
-    if (!cv?.user.id || cv.user.id !== userId) {
+    if (!cv?.user.id || cv.user.id !== user.userId) {
       throw new ForbiddenException('Vous ne pouvez pas modifier ce CV');
     }
 
-    return this.cvService.update(+id, updateCvDto);
+    const userEntity = await this.userService.findOne(user.userId);
+    if (!userEntity) {
+      throw new NotFoundException(`User with id ${user.userId} not found`);
+    }
+    return this.cvService.updateWithUser(+id, updateCvDto, userEntity);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @ConnectedUser('userId') userId: number) {
+  async remove(@Param('id') id: string, @ConnectedUser() user: any) {
     const cv = await this.cvService.findOne(+id);
 
-    return cv?.user.id == userId
-      ? this.cvService.delete(+id)
-      : new ForbiddenException('Vous ne pouvez pas supprimer ce CV');
+    if (!cv?.user.id || cv.user.id !== user.userId) {
+      throw new ForbiddenException('Vous ne pouvez pas supprimer ce CV');
+    }
+
+    const userEntity = await this.userService.findOne(user.userId);
+    if (!userEntity) {
+      throw new NotFoundException(`User with id ${user.userId} not found`);
+    }
+    return this.cvService.deleteWithUser(+id, userEntity);
   }
 
   @Post(':id/photo')
@@ -101,6 +119,7 @@ export class CvController {
       }),
     )
     file: Express.Multer.File,
+    @ConnectedUser() user: any,
   ) {
     try {
       const cv = await this.cvService.findOne(id);
@@ -108,8 +127,23 @@ export class CvController {
         throw new NotFoundException(`CV with id ${id} not found`);
       }
 
-      return await this.cvService.updatePhoto(id, file.filename);
+      // Comparez les valeurs après conversion en nombre pour être sûr
+      if (
+        Number(cv.user.id) !== Number(user.userId) &&
+        user.role !== Role.ADMIN
+      ) {
+        throw new ForbiddenException('Vous ne pouvez pas modifier ce CV');
+      }
+
+      // Récupérer l'entité User complète comme dans la méthode update
+      const userEntity = await this.userService.findOne(user.userId);
+      if (!userEntity) {
+        throw new NotFoundException(`User with id ${user.userId} not found`);
+      }
+
+      return await this.cvService.updatePhoto(id, file.filename, userEntity);
     } catch (error) {
+      // Gestion des erreurs...
       if (file?.filename) {
         const filePath = path.join(
           process.cwd(),
@@ -126,5 +160,4 @@ export class CvController {
       throw error;
     }
   }
- 
 }

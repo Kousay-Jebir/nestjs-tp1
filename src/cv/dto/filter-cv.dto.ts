@@ -11,5 +11,4 @@ export class CvFilterDto extends PaginationDto {
   @Type(() => Number)
   @IsNumber()
   age?: number;
-  
 }

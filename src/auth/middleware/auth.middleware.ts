@@ -7,7 +7,7 @@ export class AuthMiddleware implements NestMiddleware {
   constructor(private configService: ConfigService) {}
   use(req: any, res: any, next: NextFunction) {
     const token = req.headers['auth-user'] as string;
-    const secret = process.env.SECRET
+    const secret = process.env.SECRET;
 
     if (!token) {
       return res
@@ -15,7 +15,7 @@ export class AuthMiddleware implements NestMiddleware {
         .json({ message: 'Vous ne pouvez pas accéder à la ressource' });
     }
     try {
-      const decoded = verify(token,`${secret}` ) as {
+      const decoded = verify(token, `${secret}`) as {
         sub: string;
         userId: number;
         iat: number;
