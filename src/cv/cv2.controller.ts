@@ -26,10 +26,15 @@ import { uploadConfig } from 'config/upload.config';
 import path from 'path';
 import { RequestWithUser } from './interfaces/requestWithUser.type';
 import * as fs from 'fs';
+import { UserService } from '../user/user.service';
+import { Role } from '../user/enums/role.enum';
 
 @Controller({ path: 'cv', version: '2' })
 export class Cv2Controller {
-  constructor(private readonly cvService: CvService) {}
+  constructor(
+    private readonly cvService: CvService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   create(@Body() createCvDto: CreateCvDto) {
@@ -92,6 +97,7 @@ export class Cv2Controller {
       }),
     )
     file: Express.Multer.File,
+    @Req() req: RequestWithUser,
   ) {
     try {
       const cv = await this.cvService.findOne(id);
@@ -99,7 +105,23 @@ export class Cv2Controller {
         throw new NotFoundException(`CV with id ${id} not found`);
       }
 
-      return await this.cvService.updatePhoto(id, file.filename);
+      // Vérification que l'utilisateur est propriétaire du CV ou est admin
+      if (
+        Number(cv.user.id) !== Number(req.user.userId) &&
+        req.user.role !== Role.ADMIN
+      ) {
+        throw new ForbiddenException('Vous ne pouvez pas modifier ce CV');
+      }
+
+      // Get the user from the request
+      const user = await this.userService.findOne(req.user.userId);
+      if (!user) {
+        throw new NotFoundException(
+          `User with id ${req.user.userId} not found`,
+        );
+      }
+
+      return await this.cvService.updatePhoto(id, file.filename, user);
     } catch (error) {
       // Delete uploaded file if service operation fails
       if (file?.filename) {

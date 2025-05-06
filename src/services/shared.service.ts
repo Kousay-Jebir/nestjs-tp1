@@ -18,20 +18,19 @@ import { use } from 'passport';
 export class SharedService<T extends ObjectLiteral> {
   constructor(protected readonly repository: Repository<T>) {}
 
-  async findAll(filter? : PaginationDto,user?:any): Promise<T[]> {
+  async findAll(filter?: PaginationDto, user?: any): Promise<T[]> {
     try {
       const options: any = {};
-      
 
       if (user?.role !== 'admin') {
-        options.where = { user : {id: user?.userId} } as any;
+        options.where = { user: { id: user?.userId } } as any;
       }
-  
+
       if (filter?.limit !== undefined && filter?.offset !== undefined) {
         options.take = filter.limit;
         options.skip = filter.offset;
       }
-  
+
       return await this.repository.find(options);
     } catch (error) {
       if (error instanceof NotFoundException) {

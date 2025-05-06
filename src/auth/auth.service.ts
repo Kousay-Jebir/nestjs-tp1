@@ -13,15 +13,14 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async signup(signupDto: SignupDto): Promise<void> {
-    const { username, password, email, role} = signupDto;
+    const { username, password, email, role } = signupDto;
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-
 
     const user = new User();
     user.username = username;
