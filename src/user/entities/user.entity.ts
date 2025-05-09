@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Cv } from '../../cv/entities/cv.entity';
 import { Role } from '../enums/role.enum';
+import { History } from 'src/history/entities/history.entity';
 
 @Entity()
 export class User {
@@ -24,4 +25,5 @@ export class User {
 
   @OneToMany(() => Cv, (cv) => cv.user)
   cvs: Cv[];
+  @OneToMany(() => History, h => h.performedBy) histories: History[];
 }
