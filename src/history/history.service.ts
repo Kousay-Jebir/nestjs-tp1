@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { History } from './entities/history.entity';
+import { EntityType } from './enum/entity-type.enum';
 
 @Injectable()
 export class HistoryService {
@@ -15,10 +16,17 @@ export class HistoryService {
     await this.repo.save(rec);
   }
 
-  async getHistory(entityType: string, entityId: number) {
+  async getHistoryByEntity(entityType: EntityType, entityId: number) {
     return this.repo.find({
       where: { entityType, entityId },
       order: { timestamp: 'DESC' },
     });
   }
+  async getHistoryByUser(userId: number) {
+    return this.repo.find({
+      where: { performedByUserId: userId },
+      order: { timestamp: 'DESC' },
+    });
+  }
+
 }
