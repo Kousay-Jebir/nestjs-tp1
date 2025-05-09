@@ -16,26 +16,33 @@ import { use } from 'passport';
 import { EventBus } from '@nestjs/cqrs';
 import { ActionEvent } from 'src/event/event';
 import { ActionTypeEnum } from 'src/history/enum/action-type.enum';
+import { EntityType } from 'src/history/enum/entity-type.enum';
+import { CustomEventEmitter } from 'src/event/event-emitter.service';
 
 @Injectable()
 export class SharedService<T extends ObjectLiteral> {
-  constructor(protected readonly repository: Repository<T>,  private eventBus: EventBus,
-  ) {}
+  constructor(protected readonly repository: Repository<T>, private events: CustomEventEmitter,
+  ) { }
 
-  async findAll(filter? : PaginationDto,user?:any): Promise<T[]> {
+  private get entityType(): EntityType {
+    const name = this.repository.metadata.name;
+    return EntityType[name.toUpperCase() as keyof typeof EntityType];
+  }
+
+  async findAll(filter?: PaginationDto, user?: any): Promise<T[]> {
     try {
       const options: any = {};
-      
+
 
       if (user?.role !== 'admin') {
-        options.where = { user : {id: user?.userId} } as any;
+        options.where = { user: { id: user?.userId } } as any;
       }
-  
+
       if (filter?.limit !== undefined && filter?.offset !== undefined) {
         options.take = filter.limit;
         options.skip = filter.offset;
       }
-  
+
       return await this.repository.find(options);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -79,7 +86,7 @@ export class SharedService<T extends ObjectLiteral> {
     }
   }
 
-  async update(id: number, data: DeepPartial<T>,userId:number): Promise<T> {
+  async update(id: number, data: DeepPartial<T>, userId: number): Promise<T> {
     const entity = await this.findOne(id);
     if (!entity) {
       throw new NotFoundException(`Entity with id ${id} not found`);
@@ -88,7 +95,14 @@ export class SharedService<T extends ObjectLiteral> {
       ...entity,
       ...data,
     });
-    await this.eventBus.publish(new ActionEvent(id,ActionTypeEnum.UPDATE, userId))
+    this.events.emitEvent(
+      {
+        entityType: this.entityType,
+        entityId: id,
+        action: ActionTypeEnum.UPDATE,
+        performedByUserId: userId,
+      }
+    )
     return this.repository.save(updated);
   }
 
