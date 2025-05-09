@@ -9,7 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { HistoryModule } from './history/history.module';
-import { EventModule } from './event/event.module';
+import { EventsModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -32,9 +32,9 @@ import { EventModule } from './event/event.module';
     SkillModule,
     AuthModule,
     HistoryModule,
-    EventModule,
+    EventsModule,
   ],
   providers: [AppService],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,4 +1,10 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CustomEventEmitter } from './event-emitter.service';
 
-@Module({})
-export class EventModule {}
+@Module({
+    imports: [EventEmitterModule.forRoot()],
+    providers: [CustomEventEmitter],
+    exports: [CustomEventEmitter],
+})
+export class EventsModule { }

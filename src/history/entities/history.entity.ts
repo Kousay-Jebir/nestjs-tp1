@@ -1,27 +1,33 @@
-// src/cv-history/entities/cv-history.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, ManyToMany, ManyToOne } from 'typeorm';
+// src/history/history.entity.ts
+import {
+  Entity, PrimaryGeneratedColumn, Column,
+  CreateDateColumn, ManyToOne, JoinColumn
+} from 'typeorm';
+import { EntityType } from '../enum/entity-type.enum';
 import { ActionTypeEnum } from '../enum/action-type.enum';
 import { User } from 'src/user/entities/user.entity';
 
-@Entity()
+@Entity('history')
 export class History {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'enum', enum: EntityType })
+  entityType: EntityType;
+
   @Column()
   entityId: number;
 
-  
+  @Column({ type: 'enum', enum: ActionTypeEnum })
+  action: ActionTypeEnum;
 
-
-  
-
-  @Column({type:'enum',enum:ActionTypeEnum})
-  actionType: ActionTypeEnum;
-
-  @ManyToOne(()=>User,user=>user.history)
+  @ManyToOne(() => User, user => user.histories, { nullable: false })
+  @JoinColumn({ name: 'performedByUserId' })
   performedBy: User;
 
+  @Column()
+  performedByUserId: number;
+
   @CreateDateColumn()
-  doneAt: Date;
+  timestamp: Date;
 }

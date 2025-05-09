@@ -25,6 +25,5 @@ export class User {
 
   @OneToMany(() => Cv, (cv) => cv.user)
   cvs: Cv[];
-  @OneToMany(()=>History,history=>history.performedBy)
-  history : History[]
+  @OneToMany(() => History, h => h.performedBy) histories: History[];
 }

@@ -1,28 +1,24 @@
-// src/history/history.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { History } from './entities/history.entity';
-import { ActionTypeEnum } from './enum/action-type.enum';
-import { User } from '@ngneat/falso';
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class HistoryService {
   constructor(
     @InjectRepository(History)
-    private historyRepo: Repository<History>,
-    private userService : UserService
-  ) {}
+    private repo: Repository<History>,
+  ) { }
 
-  async log(entityId: number, action: ActionTypeEnum, performedById: number) {
+  async logEvent(data: Partial<History>) {
+    const rec = this.repo.create(data);
+    await this.repo.save(rec);
+  }
 
-    const history = this.historyRepo.create({ entityId,actionType:action});
-    const user =await this.userService.findOne(performedById)
-    if(!user){
-        throw new NotFoundException
-    }
-    history.performedBy=user
-    await this.historyRepo.save(history);
+  async getHistory(entityType: string, entityId: number) {
+    return this.repo.find({
+      where: { entityType, entityId },
+      order: { timestamp: 'DESC' },
+    });
   }
 }
