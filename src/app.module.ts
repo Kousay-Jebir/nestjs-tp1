@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MessageModule } from './messages/message.module';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MessageModule } from './messages/message.module';
     SkillModule,
     AuthModule,
     MessageModule,
+    SocketModule,
   ],
   providers: [AppService],
   controllers: [AppController],
