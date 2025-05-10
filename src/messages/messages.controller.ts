@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { MessageService } from './services/message.service';
 import { plainToInstance } from 'class-transformer';
@@ -18,6 +20,7 @@ import {
   CreateMessageDto,
   MessageReactionDto,
   MessageResponseDto,
+  UpdateMessageDto,
 } from './dtos/message.dto';
 import { Message } from './entities/message.entity';
 
@@ -32,45 +35,100 @@ export class MessageController {
     @Body() createMessageDto: CreateMessageDto,
   ) {
     const message = await this.messageService.createMessage(
-      connectedUser.id,
+      connectedUser.userId,
       createMessageDto,
     );
     return this.toMessageDto(message);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {}
+  async findOne(@Param('id') id: string, @ConnectedUser() user) {
+    const message = await this.messageService.findOne(+id);
+    if (!message) {
+      throw new NotFoundException(`Message with ID ${id} not found`);
+    }
+    return this.toMessageDto(message);
+  }
 
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.messageService.delete(+id);
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateMessageDto: UpdateMessageDto,
+    @ConnectedUser() user,
+  ) {
+    const message = await this.messageService.findOne(+id);
+    if (!message) {
+      throw new NotFoundException(`Message with ID ${id} not found`);
+    }
+    if (message.author.id !== user.userId) {
+      throw new ForbiddenException('You can only edit your own messages');
+    }
+    const updated = await this.messageService.update(+id, {
+      ...updateMessageDto,
+      isEdited: true,
+    });
+    return this.toMessageDto(updated);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string, @ConnectedUser() user) {
+    const message = await this.messageService.findOne(+id);
+    if (!message) {
+      throw new NotFoundException(`Message with ID ${id} not found`);
+    }
+    if (message.author.id !== user.userId) {
+      throw new ForbiddenException('You can only delete your own messages');
+    }
+    await this.messageService.softDelete(+id);
+    return { message: 'Message deleted successfully' };
   }
 
   @Post(':id/reactions')
   async addReaction(
     @Param('id') messageId: string,
     @Body() reactionDto: MessageReactionDto,
-  ): Promise<void> {}
+    @ConnectedUser() user,
+  ) {
+    return await this.messageService.addReaction(
+      +messageId,
+      user.userId,
+      reactionDto.reactionType,
+    );
+  }
 
-  @Delete(':id/reactions/:userId/:reactionType')
+  @Delete(':id/reactions/:reactionType')
   async removeReaction(
     @Param('id') messageId: string,
-    @Param('userId') userId: string,
     @Param('reactionType') reactionType: ReactionType,
-  ): Promise<void> {}
+    @ConnectedUser() user,
+  ) {
+    await this.messageService.removeReaction(+messageId, user.userId, reactionType);
+    return { message: 'Reaction removed successfully' };
+  }
 
   @Post(':id/replies')
   async createReply(
     @Param('id') messageId: string,
-    @Body('userId') userId: number,
     @Body('content') content: string,
-  ) {}
+    @ConnectedUser() user,
+  ) {
+    return await this.messageService.addReply(+messageId, user.userId, content);
+  }
 
   @Get('room/:roomId')
   async getRoomMessages(
     @Param('roomId') roomId: string,
+    @ConnectedUser() user,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
-  ) {}
+  ) {
+    const messages = await this.messageService.getRoomMessages(
+      +roomId,
+      user.userId,
+      { limit, offset },
+    );
+    return messages.map(message => this.toMessageDto(message));
+  }
 
   private toMessageDto(message: Message): MessageResponseDto {
     return plainToInstance(MessageResponseDto, {
