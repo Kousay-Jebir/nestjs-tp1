@@ -28,11 +28,9 @@ import { uploadConfig } from 'config/upload.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-<<<<<<< HEAD
+
 import { ConnectedUser } from '../auth/decorators/user.decorator';
-=======
-import  {ConnectedUser} from '../auth/decorators/user.decorator';
->>>>>>> dc3a08dd895b9adfbfc3cf42ae548ff5997a2ae1
+
 import { OwnerParam } from 'src/roles/owner-param.decorator';
 import { AdminGuard } from 'src/auth/admin.guard';
 import { OwnershipOrAdminGuard } from 'src/roles/ownership.guard';
