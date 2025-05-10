@@ -87,7 +87,7 @@ export class CvController {
       throw new ForbiddenException('Vous ne pouvez pas modifier ce CV');
     }
 
-    return this.cvService.update(+id, updateCvDto);
+    return this.cvService.update(+id, updateCvDto,userId);
   }
 
   @Delete(':id')

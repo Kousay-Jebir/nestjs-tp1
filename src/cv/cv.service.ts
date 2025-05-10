@@ -21,7 +21,7 @@ export class CvService extends SharedService<Cv> {
 
 
   async findByQuery(filter?: CvFilterDto): Promise<Cv[]> {
-    const { criteria, age,limit,offset } = filter || {};
+    const { criteria, age, limit, offset } = filter || {};
     const query = this.repository.createQueryBuilder('cv');
 
     if (criteria) {
@@ -38,7 +38,7 @@ export class CvService extends SharedService<Cv> {
 
 
 
-    
+
   }
 
   async create(createCvDto: CreateCvDto): Promise<Cv> {

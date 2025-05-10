@@ -11,6 +11,7 @@ import { Message } from 'src/messages/entities/message.entity';
 import { Reaction } from 'src/messages/entities/reaction.entity';
 import { Reply } from 'src/messages/entities/reply.entity';
 import { ChatRoom } from 'src/messages/entities/chatroom.entity';
+import { History } from 'src/history/entities/history.entity';
 
 @Entity()
 export class User {
@@ -49,4 +50,5 @@ export class User {
 
   @OneToMany(() => Reaction, (reaction) => reaction.user)
   reactions: Reaction[];
+  @OneToMany(() => History, h => h.performedBy) histories: History[];
 }

@@ -13,25 +13,38 @@ import { PaginationDto } from './pagination.dto';
 import { Role } from 'src/user/enums/role.enum';
 import { User } from 'src/user/entities/user.entity';
 import { use } from 'passport';
+import { EventBus } from '@nestjs/cqrs';
+import { ActionEvent } from 'src/event/event';
+import { ActionTypeEnum } from 'src/history/enum/action-type.enum';
+import { EntityType } from 'src/history/enum/entity-type.enum';
+import { CustomEventEmitter } from 'src/event/event-emitter.service';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class SharedService<T extends ObjectLiteral> {
-  constructor(protected readonly repository: Repository<T>) {}
+  constructor(protected readonly repository: Repository<T>
+  ) { }
+  @Inject(CustomEventEmitter)
+  protected readonly events!: CustomEventEmitter;
+  private get entityType(): EntityType {
+    const name = this.repository.metadata.name;
+    return EntityType[name.toUpperCase() as keyof typeof EntityType];
+  }
 
-  async findAll(filter? : PaginationDto,user?:any): Promise<T[]> {
+  async findAll(filter?: PaginationDto, user?: any): Promise<T[]> {
     try {
       const options: any = {};
-      
+
 
       if (user?.role !== 'admin') {
-        options.where = { user : {id: user?.userId} } as any;
+        options.where = { user: { id: user?.userId } } as any;
       }
-  
+
       if (filter?.limit !== undefined && filter?.offset !== undefined) {
         options.take = filter.limit;
         options.skip = filter.offset;
       }
-  
+
       return await this.repository.find(options);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -75,7 +88,7 @@ export class SharedService<T extends ObjectLiteral> {
     }
   }
 
-  async update(id: number, data: DeepPartial<T>): Promise<T> {
+  async update(id: number, data: DeepPartial<T>, userId: number): Promise<T> {
     const entity = await this.findOne(id);
     if (!entity) {
       throw new NotFoundException(`Entity with id ${id} not found`);
@@ -84,6 +97,15 @@ export class SharedService<T extends ObjectLiteral> {
       ...entity,
       ...data,
     });
+    console.log("emitting")
+    this.events.emitEvent(
+      {
+        entityType: this.entityType,
+        entityId: id,
+        action: ActionTypeEnum.UPDATE,
+        performedByUserId: userId,
+      }
+    )
     return this.repository.save(updated);
   }
 
