@@ -8,6 +8,7 @@ import { SharedConfigModule } from 'config/config.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { MessageModule } from './messages/message.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuthModule } from './auth/auth.module';
     CvModule,
     SkillModule,
     AuthModule,
+    MessageModule,
   ],
   providers: [AppService],
   controllers: [AppController],

@@ -20,3 +20,15 @@ import { MessageService } from './services/message.service';
   exports: [MessageService],
 })
 export class ChatModule {}
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Message, Reaction, ChatRoom, Reply]),
+    forwardRef(() => AuthModule),
+    UserModule,
+  ],
+  controllers: [MessageController],
+  providers: [MessageService],
+  exports: [MessageService],
+})
+export class MessageModule {}
