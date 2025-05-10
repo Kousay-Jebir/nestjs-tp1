@@ -10,10 +10,12 @@ import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { HistoryModule } from './history/history.module';
 import { EventsModule } from './event/event.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     SharedConfigModule,
+    EventEmitterModule,
     TypeOrmModule.forRootAsync({
       imports: [SharedConfigModule],
       useFactory: (configService: ConfigService) => {

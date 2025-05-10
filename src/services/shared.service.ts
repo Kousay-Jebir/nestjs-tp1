@@ -18,12 +18,14 @@ import { ActionEvent } from 'src/event/event';
 import { ActionTypeEnum } from 'src/history/enum/action-type.enum';
 import { EntityType } from 'src/history/enum/entity-type.enum';
 import { CustomEventEmitter } from 'src/event/event-emitter.service';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class SharedService<T extends ObjectLiteral> {
-  constructor(protected readonly repository: Repository<T>, private events: CustomEventEmitter,
+  constructor(protected readonly repository: Repository<T>
   ) { }
-
+  @Inject(CustomEventEmitter)
+  protected readonly events!: CustomEventEmitter;
   private get entityType(): EntityType {
     const name = this.repository.metadata.name;
     return EntityType[name.toUpperCase() as keyof typeof EntityType];
@@ -95,6 +97,7 @@ export class SharedService<T extends ObjectLiteral> {
       ...entity,
       ...data,
     });
+    console.log("emitting")
     this.events.emitEvent(
       {
         entityType: this.entityType,

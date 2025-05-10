@@ -12,11 +12,12 @@ import { SkillService } from './skill.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { User } from 'src/auth/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('skill')
 export class SkillController {
-  constructor(private readonly skillService: SkillService) {}
+  constructor(private readonly skillService: SkillService) { }
 
   @Post()
   create(@Body() createSkillDto: CreateSkillDto) {
@@ -34,8 +35,8 @@ export class SkillController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillService.update(+id, updateSkillDto);
+  update(@User('id') userId, @Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
+    return this.skillService.update(+id, updateSkillDto, userId);
   }
 
   @Delete(':id')

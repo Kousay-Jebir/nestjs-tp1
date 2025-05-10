@@ -29,7 +29,7 @@ import * as fs from 'fs';
 
 @Controller({ path: 'cv', version: '2' })
 export class Cv2Controller {
-  constructor(private readonly cvService: CvService) {}
+  constructor(private readonly cvService: CvService) { }
 
   @Post()
   create(@Body() createCvDto: CreateCvDto) {
@@ -66,7 +66,7 @@ export class Cv2Controller {
       throw new ForbiddenException('Vous ne pouvez pas modifier ce CV');
     }
 
-    return this.cvService.update(id, updateCvDto);
+    return this.cvService.update(id, updateCvDto, userId);
   }
 
   @Delete(':id')

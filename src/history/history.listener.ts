@@ -10,6 +10,7 @@ export class HistoryListener {
     // écoute tous les "entity.*"
     @OnEvent('entity.*')
     async handle(payload: EventPayload) {
+        console.log("ehlo")
         await this.history.logEvent({
             entityType: payload.entityType,
             entityId: payload.entityId,
