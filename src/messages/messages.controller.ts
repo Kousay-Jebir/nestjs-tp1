@@ -29,6 +29,26 @@ import { Message } from './entities/message.entity';
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
+  @Post('rooms')
+  async createRoom(@ConnectedUser() user, @Body('name') name: string) {
+    const room = await this.messageService.createRoom(user.userId, name);
+    return room;
+  }
+
+  @Post('rooms/:roomId/members')
+  async addMemberToRoom(
+    @Param('roomId') roomId: string,
+    @ConnectedUser() user,
+    @Body('memberId') memberId: number,
+  ) {
+    const updatedRoom = await this.messageService.addMembersToRoom(
+      +roomId,
+      user.userId,
+      memberId,
+    );
+    return updatedRoom;
+  }
+
   @Post()
   async create(
     @ConnectedUser() connectedUser,
@@ -102,7 +122,11 @@ export class MessageController {
     @Param('reactionType') reactionType: ReactionType,
     @ConnectedUser() user,
   ) {
-    await this.messageService.removeReaction(+messageId, user.userId, reactionType);
+    await this.messageService.removeReaction(
+      +messageId,
+      user.userId,
+      reactionType,
+    );
     return { message: 'Reaction removed successfully' };
   }
 
@@ -127,7 +151,7 @@ export class MessageController {
       user.userId,
       { limit, offset },
     );
-    return messages.map(message => this.toMessageDto(message));
+    return messages.map((message) => this.toMessageDto(message));
   }
 
   private toMessageDto(message: Message): MessageResponseDto {

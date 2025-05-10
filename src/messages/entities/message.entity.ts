@@ -22,7 +22,7 @@ export class Message {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.sentMessages)
+  @ManyToOne(() => User, (user) => user.sentMessages, { eager: true })
   author: User;
 
   @ManyToOne(() => User, (user) => user.receivedMessages, { nullable: true })

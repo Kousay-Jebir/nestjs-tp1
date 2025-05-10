@@ -104,7 +104,6 @@ export class MessageService extends SharedService<Message> {
     const message = this.messageRepository.create(messageData);
     return this.messageRepository.save(message);
   }
-
   async addReaction(
     messageId: number,
     userId: number,
@@ -145,7 +144,6 @@ export class MessageService extends SharedService<Message> {
 
     return this.reactionRepository.save(reaction);
   }
-
   async removeReaction(
     messageId: number,
     userId: number,
@@ -165,7 +163,6 @@ export class MessageService extends SharedService<Message> {
 
     await this.reactionRepository.remove(reaction);
   }
-
   async addReply(
     messageId: number,
     userId: number,
@@ -193,7 +190,6 @@ export class MessageService extends SharedService<Message> {
 
     return this.replyRepository.save(reply);
   }
-
   async getRoomMessages(
     roomId: number,
     userId: number,
@@ -208,7 +204,7 @@ export class MessageService extends SharedService<Message> {
       throw new NotFoundException(`Chat room with ID ${roomId} not found`);
     }
 
-    if (!room.members.some(member => member.id === userId)) {
+    if (!room.members.some((member) => member.id === userId)) {
       throw new ForbiddenException('You are not a member of this room');
     }
 
@@ -232,10 +228,78 @@ export class MessageService extends SharedService<Message> {
 
     return query.getMany();
   }
-
   async softDelete(id: number): Promise<void> {
     await this.messageRepository.update(id, {
       deletedAt: new Date(),
+    });
+  }
+  async createRoom(creatorId: number, name: string) {
+    const creator = await this.userRepository.findOne({
+      where: { id: creatorId },
+    });
+    if (!creator) {
+      throw new NotFoundException(`User with ID ${creatorId} not found`);
+    }
+
+    const members: User[] = [creator];
+    const room = this.roomRepository.create({ name, members });
+
+    return this.roomRepository.save(room);
+  }
+  async addMembersToRoom(
+    roomId: number,
+    requesterId: number,
+    MemberId: number,
+  ) {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['members'],
+    });
+    if (!room) {
+      throw new NotFoundException(`Chat room with ID ${roomId} not found`);
+    }
+
+    const isRequesterMember = room.members.some(
+      (member) => member.id === requesterId,
+    );
+    if (!isRequesterMember) {
+      throw new ForbiddenException(
+        'You must be a member of the room to add others',
+      );
+    }
+
+    const newMember = await this.userRepository.findOne({
+      where: { id: MemberId },
+    });
+
+    if (!newMember)
+      throw new NotFoundException(`User with ID${MemberId} not found`);
+
+    const existingMemberId = room.members.filter(
+      (member) => member.id === MemberId,
+    );
+
+    if (existingMemberId.length > 0) {
+      throw new BadRequestException(`User already members of this room`);
+    }
+
+    room.members = [...room.members, newMember];
+    return this.roomRepository.save(room);
+  }
+  async getUserRooms(userId: number): Promise<ChatRoom[]> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return await this.roomRepository.find({
+      where: {
+        members: { id: userId },
+      },
+      relations: ['members'],
     });
   }
 }
