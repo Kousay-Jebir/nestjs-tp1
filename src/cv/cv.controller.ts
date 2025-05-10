@@ -28,7 +28,7 @@ import { uploadConfig } from 'config/upload.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import  {User as ConnectedUser} from '../auth/decorators/user.decorator';
+import { ConnectedUser } from '../auth/decorators/user.decorator';
 import { OwnerParam } from 'src/roles/owner-param.decorator';
 import { AdminGuard } from 'src/auth/admin.guard';
 import { OwnershipOrAdminGuard } from 'src/roles/ownership.guard';
@@ -46,17 +46,26 @@ export class CvController {
   }
 
   @Post('withuser')
-  addWithUser(@Body() createCvDto: CreateCvDto, @ConnectedUser('userId') userId: number) {
+  addWithUser(
+    @Body() createCvDto: CreateCvDto,
+    @ConnectedUser('userId') userId: number,
+  ) {
     return this.cvService.createWithUser(createCvDto, userId);
   }
 
   @Get()
-  async findAll(@Query() query: CvFilterDto,@ConnectedUser() user : any): Promise<Cv[]> {
+  async findAll(
+    @Query() query: CvFilterDto,
+    @ConnectedUser() user: any,
+  ): Promise<Cv[]> {
     return query.age || query.criteria
       ? await this.cvService.findByQuery(query)
-      : await this.cvService.findAll({offset:query?.offset,limit:query?.limit},user);
+      : await this.cvService.findAll(
+          { offset: query?.offset, limit: query?.limit },
+          user,
+        );
   }
-  
+
   @UseGuards(JwtAuthGuard, OwnershipOrAdminGuard)
   @OwnerParam('id')
   @Get(':id')
@@ -68,7 +77,7 @@ export class CvController {
   async update(
     @Param('id') id: string,
     @Body() updateCvDto: UpdateCvDto,
-    @ConnectedUser('userId') userId: number
+    @ConnectedUser('userId') userId: number,
   ): Promise<Cv> {
     const cv = await this.cvService.findOne(+id);
 
@@ -80,7 +89,10 @@ export class CvController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @ConnectedUser('userId') userId: number) {
+  async remove(
+    @Param('id') id: string,
+    @ConnectedUser('userId') userId: number,
+  ) {
     const cv = await this.cvService.findOne(+id);
 
     return cv?.user.id == userId
@@ -126,5 +138,4 @@ export class CvController {
       throw error;
     }
   }
- 
 }
