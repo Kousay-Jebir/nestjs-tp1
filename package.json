@@ -30,6 +30,7 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.0",
     "@nestjs/typeorm": "^11.0.0",
     "@ngneat/falso": "^7.3.0",
     "@types/multer": "^1.4.12",
@@ -43,7 +44,9 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.22"
+    "socket.io": "^4.8.1",
+    "typeorm": "^0.3.22",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

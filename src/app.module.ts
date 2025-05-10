@@ -8,9 +8,13 @@ import { SharedConfigModule } from 'config/config.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+
+import { MessageModule } from './messages/message.module';
+import { SocketModule } from './socket/socket.module';
 import { HistoryModule } from './history/history.module';
 import { EventsModule } from './event/event.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+
 
 @Module({
   imports: [
@@ -33,6 +37,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CvModule,
     SkillModule,
     AuthModule,
+    MessageModule,
+    SocketModule,
     HistoryModule,
     EventsModule,
   ],
